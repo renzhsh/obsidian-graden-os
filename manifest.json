@@ -1,0 +1,11 @@
+{
+	"id": "graden-os",
+	"name": "GardenOS",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "你的下一代知识操作系统 —— 专为数字花园打造的开箱即用解决方案",
+	"author": "Obsidian",
+	"authorUrl": "https://obsidian.md",
+	"fundingUrl": "https://obsidian.md/pricing",
+	"isDesktopOnly": false
+}
