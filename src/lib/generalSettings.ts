@@ -4,6 +4,7 @@ import { EventBus, SETTINGS_CHANGED, IMAGE_HOST_ENABLE_CHANEGD } from "./eventBu
 export interface GeneralSettings {
     version: string;
     general: {
+        vaultId: string; // 仓库ID, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)
         enableAutoUpdate: boolean;
         enableImageHosting: boolean; // 是否启用图床
         enableFileSync: boolean; // 是否启用文件同步
@@ -24,6 +25,7 @@ export interface GeneralSettings {
 export const DEFAULT_SETTINGS: GeneralSettings = {
     version: "1.0.0", // 动态替换为实际版本
     general: {
+        vaultId: '',
         enableAutoUpdate: true,
         enableImageHosting: true,
         enableFileSync: true
@@ -68,6 +70,16 @@ export class GeneralSettingTab extends PluginSettingTab {
 
         // ===================== General 配置 =====================
         containerEl.createEl("h2", { cls: 'setting-section', text: `General` });
+        new Setting(containerEl)
+            .setName("Vault ID")
+            .setDesc("仓库ID, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)")
+            .addText(text => text
+                .setPlaceholder("vault_20250613")
+                .setValue(this.settings.general.vaultId)
+                .onChange((value) => {
+                    this.settings.general.vaultId = value.trim();
+                    this.emitChanged();
+                }));
         new Setting(containerEl)
             .setName("自动更新")
             .addToggle(toggle => toggle
