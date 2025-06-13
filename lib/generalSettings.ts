@@ -1,4 +1,5 @@
 import { Setting, Plugin, PluginSettingTab, DropdownComponent, App } from "obsidian";
+import { EventBus, SETTINGS_CHANGED } from "./eventBus";
 
 export interface GeneralSettings {
     version: string;
@@ -20,7 +21,7 @@ export interface GeneralSettings {
     };
 }
 
-const DEFAULT_SETTINGS: GeneralSettings = {
+export const DEFAULT_SETTINGS: GeneralSettings = {
     version: "1.0.0", // 动态替换为实际版本
     general: {
         enableAutoUpdate: true,
@@ -43,17 +44,19 @@ const DEFAULT_SETTINGS: GeneralSettings = {
 
 export class GeneralSettingTab extends PluginSettingTab {
     /**
-     * @private
-     */
-    plugin: Plugin;
-    /**
      * @public
      */
     settings: GeneralSettings;
 
-    constructor(app: App, plugin: Plugin) {
+    /**
+     * @private
+     */
+    eventBus: EventBus;
+
+    constructor(app: App, plugin: Plugin, settings: GeneralSettings, eventBus: EventBus) {
         super(app, plugin)
-        this.plugin = plugin
+        this.settings = settings
+        this.eventBus = eventBus
     }
     display(): void {
         const { containerEl } = this;
@@ -69,9 +72,9 @@ export class GeneralSettingTab extends PluginSettingTab {
             .setName("自动更新")
             .addToggle(toggle => toggle
                 .setValue(this.settings.general.enableAutoUpdate)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     this.settings.general.enableAutoUpdate = value;
-                    await this.saveSettings();
+                    this.emitChanged();
                 }));
         new Setting(containerEl)
             .setName("图床服务")
@@ -79,9 +82,9 @@ export class GeneralSettingTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.settings.general.enableImageHosting)
-                    .onChange(async (value) => {
+                    .onChange((value) => {
                         this.settings.general.enableImageHosting = value;
-                        await this.saveSettings(); 
+                        this.emitChanged();
                     })
             );
         new Setting(containerEl)
@@ -90,9 +93,9 @@ export class GeneralSettingTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.settings.general.enableFileSync)
-                    .onChange(async (value) => {
+                    .onChange((value) => {
                         this.settings.general.enableFileSync = value;
-                        await this.saveSettings();
+                        this.emitChanged();
                     })
             );
 
@@ -108,9 +111,9 @@ export class GeneralSettingTab extends PluginSettingTab {
                     .addOption("oss-cn-qingdao", "华北1（青岛）")
                     .addOption("oss-cn-beijing", "华北2（北京）")
                     .setValue(this.settings.oss.region || "oss-cn-hangzhou")   // 设置默认值
-                    .onChange(async (value: string) => {
+                    .onChange((value: string) => {
                         this.settings.oss.region = value;          // 保存设置
-                        await this.saveSettings();               // 持久化存储
+                        this.emitChanged();               // 持久化存储
                     });
             });
         new Setting(containerEl)
@@ -118,9 +121,9 @@ export class GeneralSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setPlaceholder("Enter your AccessKey ID")
                 .setValue(this.settings.oss.accessKeyId)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     this.settings.oss.accessKeyId = value.trim();
-                    await this.saveSettings();
+                    this.emitChanged();
                 }));
         new Setting(containerEl)
             .setName("AccessKey Secret")
@@ -129,9 +132,9 @@ export class GeneralSettingTab extends PluginSettingTab {
                 text
                     .setPlaceholder("Enter your AccessKey Secret")
                     .setValue(this.settings.oss.accessKeySecret)
-                    .onChange(async (value) => {
+                    .onChange((value) => {
                         this.settings.oss.accessKeySecret = value.trim();
-                        await this.saveSettings();
+                        this.emitChanged();
                     })
             })
         new Setting(containerEl)
@@ -140,9 +143,9 @@ export class GeneralSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setPlaceholder("example-bucket")
                 .setValue(this.settings.oss.bucketName)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     this.settings.oss.bucketName = value.trim();
-                    await this.saveSettings();
+                    this.emitChanged();
                 }));
 
         // ===================== Deepseek配置 =====================
@@ -154,9 +157,9 @@ export class GeneralSettingTab extends PluginSettingTab {
                 text
                     .setPlaceholder("sk-xxxxxxxxxxxxxxxx")
                     .setValue(this.settings.deepseek.apiKey)
-                    .onChange(async (value) => {
+                    .onChange((value) => {
                         this.settings.deepseek.apiKey = value.trim();
-                        await this.saveSettings();
+                        this.emitChanged();
                     })
             })
         new Setting(containerEl)
@@ -168,9 +171,9 @@ export class GeneralSettingTab extends PluginSettingTab {
                     "deepseek-math": "Deepseek Math"
                 })
                 .setValue(this.settings.deepseek.model)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     this.settings.deepseek.model = value;
-                    await this.saveSettings();
+                    this.emitChanged();
                 }));
         new Setting(containerEl)
             .setName("Temperature")
@@ -178,18 +181,16 @@ export class GeneralSettingTab extends PluginSettingTab {
             .addSlider(slider => slider
                 .setLimits(0, 2, 0.1)
                 .setValue(this.settings.deepseek.temperature)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     this.settings.deepseek.temperature = value;
-                    await this.saveSettings();
+                    this.emitChanged();
                 })
                 .setDynamicTooltip()
             );
     }
 
-    async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.plugin.loadData());
-    }
-    private async saveSettings() {
-        await this.plugin.saveData(this.settings);
+
+    private emitChanged() {
+        this.eventBus.emit(SETTINGS_CHANGED, this.settings)
     }
 }
