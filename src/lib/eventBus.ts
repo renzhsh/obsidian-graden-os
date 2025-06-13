@@ -1,6 +1,7 @@
 type EventCallback<T = any> = (data: T) => void;
 
 export const SETTINGS_CHANGED = "settings:changed"
+export const IMAGE_HOST_ENABLE_CHANEGD = "image:host:enable:changed"
 
 export class EventBus {
     private events: Record<string, EventCallback[]> = {};

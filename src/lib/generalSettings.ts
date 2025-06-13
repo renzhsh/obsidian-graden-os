@@ -1,5 +1,5 @@
 import { Setting, Plugin, PluginSettingTab, DropdownComponent, App } from "obsidian";
-import { EventBus, SETTINGS_CHANGED } from "./eventBus";
+import { EventBus, SETTINGS_CHANGED, IMAGE_HOST_ENABLE_CHANEGD } from "./eventBus";
 
 export interface GeneralSettings {
     version: string;
@@ -85,11 +85,12 @@ export class GeneralSettingTab extends PluginSettingTab {
                     .onChange((value) => {
                         this.settings.general.enableImageHosting = value;
                         this.emitChanged();
+                        this.eventBus.emit(IMAGE_HOST_ENABLE_CHANEGD, this.settings)
                     })
             );
         new Setting(containerEl)
             .setName("文件同步")
-            .setDesc("自动同步文档至云端，并在多设备间保持一致性")
+            .setDesc("自动同步文档至阿里云OSS，并在多设备间保持一致性")
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.settings.general.enableFileSync)
