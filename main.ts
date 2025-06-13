@@ -1,26 +1,21 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Plugin } from 'obsidian';
 import PluginInstaller from "./lib/pluginInstaller";
-import { PluginInfo } from "./lib/interfaces";
+import { GeneralSettingTab } from "./lib/generalSettings";
 
-
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
 
 export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
 
 	async onload() {
 		console.log('gardenOS start')
+
+		const settingTab = new GeneralSettingTab(this.app, this);
+		await settingTab.loadSettings()
+
+		this.addSettingTab(settingTab);
+
 		const installer = new PluginInstaller(this);
 		installer.installPlugin()
 
 	}
-	
+
 }
