@@ -1,0 +1,12 @@
+[
+    {
+        "id": "remotely-save",
+        "version": "0.5.25",
+        "repo": "remotely-save/remotely-save"
+    },
+    {
+        "id": "copilot",
+        "version": "2.8.9",
+        "repo": "logancyang/obsidian-copilot"
+    }
+]
