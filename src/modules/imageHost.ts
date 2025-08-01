@@ -47,7 +47,7 @@ export class ImageHost extends BaseModule {
 
         try {
             const date = new Date();
-            const template = 'obsidian/{year}-{month}/{timestamp}-{filename}'
+            const template = `imgs/${this.settings.general.vaultName}/{year}-{month}/{timestamp}-{filename}`
             const filename = file.name
 
             // Replace individual placeholders

@@ -4,7 +4,7 @@ import { EventBus, SETTINGS_CHANGED, IMAGE_HOST_ENABLE_CHANEGD } from "./eventBu
 export interface GeneralSettings {
     version: string;
     general: {
-        vaultId: string; // 仓库ID, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)
+        vaultName: string; // 仓库名称, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)
         enableAutoUpdate: boolean;
         enableImageHosting: boolean; // 是否启用图床
         enableFileSync: boolean; // 是否启用文件同步
@@ -15,17 +15,12 @@ export interface GeneralSettings {
         bucketName: string;
         region: string;
     };
-    deepseek: {
-        apiKey: string;
-        model: string;
-        temperature: number;
-    };
 }
 
 export const DEFAULT_SETTINGS: GeneralSettings = {
     version: "1.0.0", // 动态替换为实际版本
     general: {
-        vaultId: '',
+        vaultName: '',
         enableAutoUpdate: true,
         enableImageHosting: true,
         enableFileSync: true
@@ -35,11 +30,6 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
         accessKeySecret: "",
         bucketName: "",
         region: "oss-cn-hangzhou"
-    },
-    deepseek: {
-        apiKey: "",
-        model: "deepseek-chat",
-        temperature: 0.7
     }
 }
 
@@ -71,13 +61,13 @@ export class GeneralSettingTab extends PluginSettingTab {
         // ===================== General 配置 =====================
         containerEl.createEl("h2", { cls: 'setting-section', text: `General` });
         new Setting(containerEl)
-            .setName("Vault ID")
-            .setDesc("仓库ID, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)")
+            .setName("Vault Name")
+            .setDesc("仓库名称, 在OSS中用于区分不同仓库，建议使用字符：小写字母、数字和下划线(_)")
             .addText(text => text
-                .setPlaceholder("vault_20250613")
-                .setValue(this.settings.general.vaultId)
+                .setPlaceholder("software_design_vault")
+                .setValue(this.settings.general.vaultName)
                 .onChange((value) => {
-                    this.settings.general.vaultId = value.trim();
+                    this.settings.general.vaultName = value.trim();
                     this.emitChanged();
                 }));
         new Setting(containerEl)
@@ -161,45 +151,6 @@ export class GeneralSettingTab extends PluginSettingTab {
                     this.emitChanged();
                 }));
 
-        // ===================== Deepseek配置 =====================
-        containerEl.createEl("h2", { cls: 'setting-section', text: `Deepseek` });
-        new Setting(containerEl)
-            .setName("API Key")
-            .addText((text) => {
-                text.inputEl.type = "password"
-                text
-                    .setPlaceholder("sk-xxxxxxxxxxxxxxxx")
-                    .setValue(this.settings.deepseek.apiKey)
-                    .onChange((value) => {
-                        this.settings.deepseek.apiKey = value.trim();
-                        this.emitChanged();
-                    })
-            })
-        new Setting(containerEl)
-            .setName("Model")
-            .addDropdown(dropdown => dropdown
-                .addOptions({
-                    "deepseek-chat": "Deepseek Chat",
-                    "deepseek-coder": "Deepseek Coder",
-                    "deepseek-math": "Deepseek Math"
-                })
-                .setValue(this.settings.deepseek.model)
-                .onChange((value) => {
-                    this.settings.deepseek.model = value;
-                    this.emitChanged();
-                }));
-        new Setting(containerEl)
-            .setName("Temperature")
-            .setDesc("Higher values make output more random")
-            .addSlider(slider => slider
-                .setLimits(0, 2, 0.1)
-                .setValue(this.settings.deepseek.temperature)
-                .onChange((value) => {
-                    this.settings.deepseek.temperature = value;
-                    this.emitChanged();
-                })
-                .setDynamicTooltip()
-            );
     }
 
 
